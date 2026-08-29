@@ -36,6 +36,30 @@
   }
 
   /* ============================================
+     LIVE BACKGROUND — night footage of an install,
+     held behind a dark scrim so the type stays crisp.
+     ============================================ */
+  .bg-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .bg-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+      rgba(8,6,4,.74) 0%,
+      rgba(8,6,4,.6) 42%,
+      rgba(8,6,4,.9) 100%);
+  }
+
+  /* ============================================
      SIGNATURE — the roofline.
      A line of LEDs across the top edge of the page
      that cycles scenes the way the real system does.
@@ -119,6 +143,7 @@
     letter-spacing: .02em;
     color: var(--ice);
     margin-bottom: 20px;
+    text-shadow: 0 2px 18px rgba(8,6,4,.85);
   }
   h1 em { color: var(--ember-bright); font-style: normal; }
 
@@ -130,6 +155,7 @@
     opacity: .82;
     margin-bottom: 36px;
     max-width: 42ch;
+    text-shadow: 0 1px 10px rgba(8,6,4,.9), 0 0 3px rgba(8,6,4,.7);
   }
 
   /* ============================================
@@ -210,15 +236,25 @@
     line-height: 1.55;
     color: var(--parchment);
     opacity: .72;
+    text-shadow: 0 1px 10px rgba(8,6,4,.9), 0 0 3px rgba(8,6,4,.7);
   }
+  .fact h2 { text-shadow: 0 2px 14px rgba(8,6,4,.85); }
 
   @media (prefers-reduced-motion: reduce) {
+    .bg-video { display: none; }
     .roofline i { animation: none; }
     * { transition-duration: .01ms !important; }
   }
 </style>
 </head>
 <body>
+
+<!-- Live background: one of our installs at night -->
+<video class="bg-video" id="bgvid" autoplay muted loop playsinline preload="auto" poster="hero-poster.jpg" aria-hidden="true">
+  <source src="hero-bg.mp4" type="video/mp4">
+  <source src="hero-bg.webm" type="video/webm">
+</video>
+<div class="bg-scrim" aria-hidden="true"></div>
 
 <!-- The roofline: 28 bulbs, staggered, cycling scenes -->
 <div class="roofline" aria-hidden="true" id="roofline"></div>
@@ -283,6 +319,20 @@
     var b = document.createElement('i');
     b.style.setProperty('--d', (-20 + (i * 0.09)).toFixed(2) + 's');
     rail.appendChild(b);
+  }
+
+  // Nudge the background video to play — iOS Low Power Mode and some
+  // browsers block autoplay until the first touch; the poster holds
+  // the frame until then.
+  var vid = document.getElementById('bgvid');
+  if (vid) {
+    vid.muted = true;
+    var tryPlay = function () {
+      var p = vid.play();
+      if (p && p.catch) p.catch(function () {});
+    };
+    tryPlay();
+    document.addEventListener('touchend', tryPlay, { once: true, passive: true });
   }
 
 })();
